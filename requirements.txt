@@ -1,0 +1,31 @@
+# AlphaLab AI — Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Core Framework ──────────────────────────────────────────────────────────
+streamlit>=1.35.0
+
+# ── Data & Numerics ─────────────────────────────────────────────────────────
+pandas>=2.0.0
+numpy>=1.26.0
+
+# ── Statistical Modeling ────────────────────────────────────────────────────
+scipy>=1.12.0
+statsmodels>=0.14.0
+scikit-learn>=1.4.0
+
+# ── Visualization ───────────────────────────────────────────────────────────
+plotly>=5.20.0
+kaleido>=0.2.1          # Required for Plotly chart → PNG export in reports
+
+# ── Market Data ─────────────────────────────────────────────────────────────
+yfinance>=0.2.38
+
+# ── AI Integration ──────────────────────────────────────────────────────────
+openai>=1.30.0
+
+# ── Database (built-in, no install needed) ──────────────────────────────────
+# sqlite3 is part of Python standard library
+
+# ── Optional: Faster data processing ────────────────────────────────────────
+# pyarrow>=14.0.0        # Speeds up Streamlit dataframes
+# bottleneck>=1.3.7      # Speeds up pandas rolling operations
