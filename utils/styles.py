@@ -18,39 +18,26 @@ def inject_css():
         color: #e5e5e5 !important;
     }
 
-    /* ── Sidebar ──────────────────────────── */
-    [data-testid="stSidebar"] {
-        background-color: #111111 !important;
-        border-right: 1px solid #1f1f1f !important;
-    }
-    [data-testid="stSidebar"] * { font-family: 'Inter', sans-serif !important; }
-    [data-testid="stSidebarNav"] a {
-        color: #888 !important;
-        font-size: 13px !important;
-        padding: 6px 12px !important;
-        border-radius: 6px !important;
-        transition: all 0.15s !important;
-    }
-    [data-testid="stSidebarNav"] a:hover { background: #1a1a1a !important; color: #e5e5e5 !important; }
-    [data-testid="stSidebarNav"] a[aria-current="page"] {
-        background: #1e1e2e !important;
-        color: #818cf8 !important;
-    }
+    /* ── Hide sidebar completely ──────────── */
+    [data-testid="stSidebar"]         { display: none !important; }
+    [data-testid="collapsedControl"]  { display: none !important; }
+    section[data-testid="stSidebar"]  { display: none !important; }
 
     /* ── Main content ─────────────────────── */
     .main .block-container {
-        padding: 2rem 2.5rem !important;
-        max-width: 1100px !important;
+        padding: 2rem 2rem 6rem 2rem !important;
+        max-width: 860px !important;
+        margin: 0 auto !important;
     }
 
     /* ── Typography ───────────────────────── */
-    h1 { font-size: 1.6rem !important; font-weight: 600 !important; color: #f0f0f0 !important; letter-spacing: -0.02em !important; margin-bottom: 0.25rem !important; }
-    h2 { font-size: 1.1rem !important; font-weight: 500 !important; color: #d0d0d0 !important; letter-spacing: -0.01em !important; }
-    h3 { font-size: 0.95rem !important; font-weight: 500 !important; color: #c0c0c0 !important; }
-    p, li { font-size: 0.875rem !important; line-height: 1.7 !important; color: #a0a0a0 !important; }
+    h1 { font-size: 1.5rem !important; font-weight: 600 !important; color: #f0f0f0 !important; letter-spacing: -0.02em !important; margin: 0 !important; }
+    h2 { font-size: 1.05rem !important; font-weight: 500 !important; color: #d0d0d0 !important; }
+    h3 { font-size: 0.9rem !important; font-weight: 500 !important; color: #c0c0c0 !important; }
+    p  { font-size: 0.875rem !important; line-height: 1.7 !important; color: #888 !important; margin: 0 !important; }
 
     /* ── Divider ──────────────────────────── */
-    hr { border: none !important; border-top: 1px solid #1f1f1f !important; margin: 1.5rem 0 !important; }
+    hr { border: none !important; border-top: 1px solid #1f1f1f !important; margin: 1.25rem 0 !important; }
 
     /* ── Inputs ───────────────────────────── */
     .stTextInput > div > div > input,
@@ -62,10 +49,8 @@ def inject_css():
         color: #e5e5e5 !important;
         font-size: 0.875rem !important;
         font-family: 'Inter', sans-serif !important;
-        transition: border-color 0.15s !important;
     }
     .stTextInput > div > div > input:focus,
-    .stNumberInput > div > div > input:focus,
     .stTextArea textarea:focus {
         border-color: #5865f2 !important;
         box-shadow: 0 0 0 3px rgba(88,101,242,0.1) !important;
@@ -78,7 +63,13 @@ def inject_css():
         border-radius: 8px !important;
         color: #e5e5e5 !important;
     }
-    label { font-size: 0.8rem !important; color: #666 !important; font-weight: 500 !important; letter-spacing: 0.02em !important; text-transform: uppercase !important; }
+    label {
+        font-size: 0.75rem !important;
+        color: #555 !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.04em !important;
+        text-transform: uppercase !important;
+    }
 
     /* ── Buttons ──────────────────────────── */
     .stButton > button {
@@ -89,15 +80,18 @@ def inject_css():
         font-size: 0.875rem !important;
         border-radius: 8px !important;
         padding: 0.5rem 1.25rem !important;
-        transition: all 0.15s !important;
         font-family: 'Inter', sans-serif !important;
+        transition: background 0.15s !important;
     }
-    .stButton > button:hover {
-        background: #4752c4 !important;
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(88,101,242,0.3) !important;
+    .stButton > button:hover { background: #4752c4 !important; }
+
+    /* Secondary button override via key class */
+    button[kind="secondary"] {
+        background: #161616 !important;
+        border: 1px solid #262626 !important;
+        color: #888 !important;
     }
-    .stButton > button:active { transform: translateY(0) !important; }
+    button[kind="secondary"]:hover { color: #e5e5e5 !important; border-color: #444 !important; }
 
     /* ── Metrics ──────────────────────────── */
     [data-testid="metric-container"] {
@@ -107,30 +101,28 @@ def inject_css():
         padding: 1rem 1.25rem !important;
     }
     [data-testid="metric-container"] label {
-        color: #555 !important;
+        color: #444 !important;
         font-size: 0.7rem !important;
         text-transform: uppercase !important;
         letter-spacing: 0.06em !important;
     }
     [data-testid="metric-container"] [data-testid="stMetricValue"] {
         color: #f0f0f0 !important;
-        font-size: 1.5rem !important;
+        font-size: 1.4rem !important;
         font-weight: 600 !important;
-        font-family: 'Inter', sans-serif !important;
     }
-    [data-testid="metric-container"] [data-testid="stMetricDelta"] { font-size: 0.75rem !important; }
 
     /* ── Tabs ─────────────────────────────── */
     .stTabs [data-baseweb="tab-list"] {
         background: transparent !important;
         border-bottom: 1px solid #1f1f1f !important;
         gap: 0 !important;
+        padding: 0 !important;
     }
     .stTabs [data-baseweb="tab"] {
         background: transparent !important;
         color: #555 !important;
-        font-size: 0.875rem !important;
-        font-weight: 500 !important;
+        font-size: 0.85rem !important;
         padding: 0.6rem 1rem !important;
         border-bottom: 2px solid transparent !important;
         border-radius: 0 !important;
@@ -143,27 +135,14 @@ def inject_css():
 
     /* ── Dataframes ───────────────────────── */
     [data-testid="stDataFrame"] {
-        background: #161616 !important;
         border: 1px solid #1f1f1f !important;
         border-radius: 10px !important;
         overflow: hidden !important;
     }
 
     /* ── Expanders ────────────────────────── */
-    details {
-        background: #161616 !important;
-        border: 1px solid #1f1f1f !important;
-        border-radius: 8px !important;
-    }
-    summary { font-size: 0.875rem !important; color: #aaa !important; }
-
-    /* ── Alerts / Info boxes ──────────────── */
-    .stAlert {
-        background: #161616 !important;
-        border: 1px solid #1f1f1f !important;
-        border-radius: 8px !important;
-        font-size: 0.85rem !important;
-    }
+    details { background: #161616 !important; border: 1px solid #1f1f1f !important; border-radius: 8px !important; }
+    summary { font-size: 0.85rem !important; color: #888 !important; }
 
     /* ── File uploader ────────────────────── */
     [data-testid="stFileUploader"] {
@@ -172,44 +151,63 @@ def inject_css():
         border-radius: 10px !important;
     }
 
+    /* ── Chat messages ────────────────────── */
+    [data-testid="stChatMessage"] {
+        background: transparent !important;
+        border: none !important;
+        padding: 0.25rem 0 !important;
+    }
+    [data-testid="stChatMessageContent"] {
+        font-size: 0.9rem !important;
+        line-height: 1.7 !important;
+        color: #d0d0d0 !important;
+    }
+    /* Chat input */
+    [data-testid="stChatInput"] textarea {
+        background: #161616 !important;
+        border: 1px solid #262626 !important;
+        border-radius: 12px !important;
+        color: #e5e5e5 !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.9rem !important;
+    }
+    [data-testid="stChatInput"] textarea:focus {
+        border-color: #5865f2 !important;
+        box-shadow: 0 0 0 3px rgba(88,101,242,0.1) !important;
+    }
+    [data-testid="stChatInput"] {
+        background: #0d0d0d !important;
+        border-top: 1px solid #1a1a1a !important;
+        padding: 1rem 0 !important;
+    }
+
+    /* ── Alerts ───────────────────────────── */
+    .stAlert { background: #161616 !important; border: 1px solid #1f1f1f !important; border-radius: 8px !important; font-size: 0.85rem !important; }
+
     /* ── Scrollbar ────────────────────────── */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
-    ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
 
-    /* ── Hide Streamlit branding ──────────── */
+    /* ── Hide Streamlit UI chrome ─────────── */
     #MainMenu { visibility: hidden; }
-    footer { visibility: hidden; }
-    header { visibility: hidden; }
+    footer     { visibility: hidden; }
+    header     { visibility: hidden; }
     </style>
     """, unsafe_allow_html=True)
 
 
 def page_header(title: str, subtitle: str = ""):
-    """Render a clean, consistent page header."""
     st.markdown(f"""
-    <div style="padding: 0.5rem 0 1.5rem 0;">
-        <h1 style="margin:0; font-size:1.5rem; font-weight:600; color:#f0f0f0; letter-spacing:-0.02em;">{title}</h1>
-        {f'<p style="margin:0.35rem 0 0 0; font-size:0.875rem; color:#555;">{subtitle}</p>' if subtitle else ''}
+    <div style="padding: 0.25rem 0 1.25rem 0;">
+        <h1 style="margin:0; font-size:1.4rem; font-weight:600; color:#f0f0f0;">{title}</h1>
+        {f'<p style="margin:0.3rem 0 0 0; font-size:0.85rem; color:#555;">{subtitle}</p>' if subtitle else ''}
     </div>
     """, unsafe_allow_html=True)
     st.divider()
 
 
-def stat_card(label: str, value: str, sub: str = "", accent: str = "#5865f2"):
-    """Render a single clean stat card."""
-    return f"""
-    <div style="background:#161616; border:1px solid #1f1f1f; border-radius:10px; padding:1rem 1.25rem;">
-        <div style="font-size:0.7rem; color:#555; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.4rem;">{label}</div>
-        <div style="font-size:1.4rem; font-weight:600; color:{accent}; font-family:'Inter',sans-serif;">{value}</div>
-        {f'<div style="font-size:0.75rem; color:#444; margin-top:0.25rem;">{sub}</div>' if sub else ''}
-    </div>
-    """
-
-
 def info_box(text: str, kind: str = "info"):
-    """Render a clean inline info/warning box."""
     colors = {
         "info":    ("#1e1e2e", "#5865f2"),
         "warning": ("#1f1a10", "#f59e0b"),
@@ -218,9 +216,8 @@ def info_box(text: str, kind: str = "info"):
     }
     bg, accent = colors.get(kind, colors["info"])
     st.markdown(f"""
-    <div style="background:{bg}; border-left:3px solid {accent};
-                border-radius:0 8px 8px 0; padding:0.75rem 1rem;
-                font-size:0.825rem; color:#aaa; line-height:1.6; margin:0.75rem 0;">
+    <div style="background:{bg}; border-left:3px solid {accent}; border-radius:0 8px 8px 0;
+                padding:0.75rem 1rem; font-size:0.825rem; color:#888; line-height:1.6; margin:0.5rem 0;">
         {text}
     </div>
     """, unsafe_allow_html=True)
