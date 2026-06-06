@@ -474,32 +474,55 @@ def _topic_from_question(q: str) -> str:
 
 # ── Primary dispatcher used by app.py ────────────────────────────────────────
 
+def _get_key(name: str) -> str:
+    """
+    Resolve an API key from: Streamlit secrets → environment variable → session state.
+    Streamlit secrets (set in Streamlit Cloud dashboard) are the primary source
+    so the app works for ALL users without them providing any key.
+    """
+    # 1. Streamlit Cloud secrets (server-side, invisible to users)
+    try:
+        import streamlit as _st
+        val = _st.secrets.get(name, "")
+        if val:
+            return val.strip()
+    except Exception:
+        pass
+
+    # 2. Environment variable (local .streamlit/secrets.toml or .env)
+    val = os.environ.get(name, "")
+    if val:
+        return val.strip()
+
+    # 3. User-entered key in settings (last resort)
+    session_key = "anthropic_api_key" if "ANTHROPIC" in name else "openai_api_key"
+    try:
+        import streamlit as _st
+        return _st.session_state.get(session_key, "").strip()
+    except Exception:
+        return ""
+
+
 def get_best_response(module_id: str, history: list, user_message: str) -> str:
     """
     Try AI providers in order: Claude → OpenAI → intelligent fallback.
-    Reads API keys from session state or environment variables.
+    Server-side keys (Streamlit secrets) are used first so no user action needed.
     """
-    # 1. Try Claude (Anthropic)
-    anthropic_key = (
-        st.session_state.get("anthropic_api_key", "").strip()
-        or os.environ.get("ANTHROPIC_API_KEY", "").strip()
-    )
+    # 1. Try Claude (Anthropic) — primary
+    anthropic_key = _get_key("ANTHROPIC_API_KEY")
     if anthropic_key:
         result = get_claude_response(module_id, history, user_message, anthropic_key)
         if result and not result.startswith("_Claude error"):
             return result
 
-    # 2. Try OpenAI
-    openai_key = (
-        st.session_state.get("openai_api_key", "").strip()
-        or os.environ.get("OPENAI_API_KEY", "").strip()
-    )
+    # 2. Try OpenAI — secondary
+    openai_key = _get_key("OPENAI_API_KEY")
     if openai_key:
         result = get_openai_response_chat(module_id, history, user_message, openai_key)
         if result and not result.startswith("_OpenAI error"):
             return result
 
-    # 3. Intelligent rule-based fallback
+    # 3. Intelligent rule-based fallback (no key needed)
     return intelligent_fallback(module_id, user_message)
 
 

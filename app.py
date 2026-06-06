@@ -192,39 +192,13 @@ def render_chat():
         if st.button("⚙", key="btn_settings", help="Settings"):
             st.session_state["show_settings"] = not st.session_state.get("show_settings", False)
 
-    # Inline settings panel
+    # Inline settings panel — risk parameters only, no API key exposure
     if st.session_state.get("show_settings", False):
         with st.expander("Settings", expanded=True):
-            # Detect which provider is active
-            has_anthropic = bool(st.session_state.get("anthropic_api_key", "").strip()
-                                 or __import__("os").environ.get("ANTHROPIC_API_KEY", ""))
-            has_openai    = bool(st.session_state.get("openai_api_key", "").strip()
-                                 or __import__("os").environ.get("OPENAI_API_KEY", ""))
-            status = "● Claude connected" if has_anthropic else ("● OpenAI connected" if has_openai else "● No AI key — using built-in answers")
-            color  = "#22c55e" if (has_anthropic or has_openai) else "#f59e0b"
-            st.markdown(f'<p style="font-size:0.8rem; color:{color}; margin-bottom:0.5rem;">{status}</p>', unsafe_allow_html=True)
-
-            ant_in = st.text_input("Anthropic API key (Claude) — recommended",
-                                   value=st.session_state.anthropic_api_key,
-                                   type="password", placeholder="sk-ant-...")
-            oai_in = st.text_input("OpenAI API key (GPT-4o-mini) — fallback",
-                                   value=st.session_state.openai_api_key,
-                                   type="password", placeholder="sk-...")
-            c1, c2, _ = st.columns([1, 1, 4])
-            with c1:
-                if st.button("Save keys"):
-                    st.session_state.anthropic_api_key = ant_in.strip()
-                    st.session_state.openai_api_key    = oai_in.strip()
-                    st.success("Saved.")
-                    st.rerun()
-            with c2:
-                if st.button("Clear keys"):
-                    st.session_state.anthropic_api_key = ""
-                    st.session_state.openai_api_key    = ""
-                    st.rerun()
             rf = st.number_input("Risk-free rate (%)", value=st.session_state.risk_free_rate * 100,
-                                 min_value=0.0, max_value=20.0, step=0.1)
-            if st.button("Save rate"):
+                                 min_value=0.0, max_value=20.0, step=0.1,
+                                 help="Used in Sharpe ratio calculations. Typically the 3-month T-Bill rate.")
+            if st.button("Save"):
                 st.session_state.risk_free_rate = rf / 100.0
                 st.success("Saved.")
 
