@@ -99,80 +99,80 @@ def go_home():
 # ══════════════════════════════════════════════════════════════════════════════
 
 def render_home():
-    # Header
+    # ── Header ────────────────────────────────────────────────────────────────
     st.markdown("""
-    <div style="padding: 2.5rem 0 2rem 0;">
-        <div style="font-size: 0.7rem; color: #333; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem;">Statistical Research Copilot</div>
-        <h1 style="font-size: 2rem; font-weight: 600; color: #f0f0f0; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 0.65rem 0;">
+    <div style="padding: 3rem 0 2.25rem 0;">
+        <div style="font-size: 0.65rem; color: #3a3a3a; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500;">Statistical Research Copilot</div>
+        <h1 style="font-size: 2.1rem; font-weight: 600; color: #ebebeb; letter-spacing: -0.04em; line-height: 1.1; margin: 0 0 0.75rem 0;">
             AlphaLab AI
         </h1>
-        <p style="font-size: 0.95rem; color: #4a4a4a; max-width: 480px; line-height: 1.65; margin: 0;">
-            Convert research questions into quantitative analysis, statistical interpretation, and professional reports.
+        <p style="font-size: 0.9rem; color: #3d3d3d; max-width: 460px; line-height: 1.75; margin: 0;">
+            Turn research questions into statistical analysis, visualizations, and professional reports.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
     st.divider()
 
-    # Modules grid
-    st.markdown('<p style="font-size:0.7rem; color:#333; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.5rem;">Choose a module</p>', unsafe_allow_html=True)
+    # ── Module grid ───────────────────────────────────────────────────────────
+    st.markdown('<p style="font-size:0.65rem; color:#2e2e2e; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:0.75rem; font-weight:500;">Modules</p>', unsafe_allow_html=True)
 
-    # Render 2-column grid of clickable module cards
     cols = st.columns(2, gap="medium")
     for i, mod in enumerate(MODULES):
         with cols[i % 2]:
-            # Use a button for the card — clicking opens the chat
-            clicked = st.button(
+            if st.button(
                 f"**{mod['name']}**\n\n{mod['desc']}",
                 key=f"mod_{mod['id']}",
                 use_container_width=True,
-            )
-            if clicked:
+            ):
                 open_module(mod["id"])
                 st.rerun()
 
     st.divider()
 
-    # Example questions
-    st.markdown('<p style="font-size:0.7rem; color:#333; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.75rem;">Or try a question</p>', unsafe_allow_html=True)
+    # ── Example questions ─────────────────────────────────────────────────────
+    st.markdown('<p style="font-size:0.65rem; color:#2e2e2e; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:0.75rem; font-weight:500;">Try a question</p>', unsafe_allow_html=True)
 
     example_qs = [
-        ("Does QQQ explain NVDA returns better than SPY?",         "regression"),
-        ("What is the probability of SPY dropping 5% in 30 days?", "probability"),
-        ("Build the highest Sharpe portfolio from SPY, QQQ, GLD, TLT", "portfolio"),
-        ("Show me the correlation matrix for SPY, QQQ, GLD, BTC-USD", "correlation"),
-        ("Test whether SPY mean daily return is different from zero",   "inference"),
-        ("Explain the difference between R² and Adjusted R²",          "research"),
+        ("Does QQQ explain NVDA returns better than SPY?",            "regression"),
+        ("What is the probability of SPY dropping 5% in 30 days?",    "probability"),
+        ("Build the highest Sharpe portfolio from SPY, QQQ, GLD, TLT","portfolio"),
+        ("Show correlation matrix for SPY, QQQ, GLD, BTC-USD",        "correlation"),
+        ("Test whether SPY mean daily return differs from zero",       "inference"),
+        ("Explain the difference between R² and Adjusted R²",         "research"),
     ]
 
     for question, module_id in example_qs:
-        if st.button(f"↗  {question}", key=f"q_{question[:20]}", use_container_width=False):
+        if st.button(f"↗  {question}", key=f"q_{question[:25]}", use_container_width=False):
             open_module(module_id)
-            # Pre-seed the question as first user message
-            mod = MODULE_MAP[module_id]
+            mod  = MODULE_MAP[module_id]
             msgs = st.session_state.chat_messages[module_id]
             msgs.append({"role": "user", "content": question})
-            with st.spinner("Thinking..."):
+            result   = {"ran": False}
+            fig_data = None
+            df_data  = None
+            with st.spinner("Thinking…"):
                 intent = detect_intent(question, module_id)
                 if intent != "conversational":
                     result = run_analysis_from_chat(intent, question)
                     if result.get("ran"):
-                        ai_text = result["summary"]
+                        ai_text  = result["summary"]
+                        fig_data = result.get("fig")
+                        df_data  = result.get("df")
                     else:
                         ai_text = get_ai_response(mod, question)
                 else:
                     ai_text = get_ai_response(mod, question)
             msgs.append({"role": "assistant", "content": ai_text,
-                         "fig": result.get("fig") if intent != "conversational" and result.get("ran") else None,
-                         "df":  result.get("df")  if intent != "conversational" and result.get("ran") else None})
+                         "fig": fig_data, "df": df_data})
             st.rerun()
 
-    # Footer
+    # ── Footer ────────────────────────────────────────────────────────────────
     st.markdown("""
-    <p style="font-size:0.75rem; color:#252525; margin-top:2.5rem; line-height:1.7;">
-    For research and educational use only. Not financial advice.
+    <p style="font-size:0.72rem; color:#1e1e1e; margin-top:3rem; line-height:1.7;">
+    For research and educational use only — not financial advice.
     &nbsp;·&nbsp;
-    <a href="https://github.com/shahwfabian/alphalab-ai" style="color:#333; text-decoration:none;">GitHub</a>
+    <a href="https://github.com/shahwfabian/alphalab-ai" style="color:#2e2e2e; text-decoration:none;">GitHub</a>
     </p>
     """, unsafe_allow_html=True)
 
@@ -190,19 +190,40 @@ def render_chat():
     messages = st.session_state.chat_messages.get(mod_id, [])
 
     # ── Top bar ───────────────────────────────────────────────────────────────
+    st.markdown("""
+    <style>
+    /* Nav buttons — ghost style, no background */
+    [data-testid="stButton"][data-key="btn_home"] > button,
+    [data-testid="stButton"][data-key="btn_settings"] > button {
+        background: transparent !important;
+        border: none !important;
+        color: #444 !important;
+        font-size: 0.8rem !important;
+        padding: 0.25rem 0.5rem !important;
+        min-height: unset !important;
+    }
+    [data-testid="stButton"][data-key="btn_home"] > button:hover,
+    [data-testid="stButton"][data-key="btn_settings"] > button:hover {
+        color: #aaa !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     col_back, col_title, col_settings = st.columns([1, 6, 1])
     with col_back:
-        if st.button("← Home"):
+        if st.button("← Home", key="btn_home"):
             go_home(); st.rerun()
     with col_title:
         st.markdown(f"""
         <div style="padding:0.4rem 0;">
-            <span style="font-size:1rem; font-weight:600; color:#f0f0f0;">{mod['name']}</span>
-            <span style="font-size:0.8rem; color:#333; margin-left:0.75rem;">{mod['desc']}</span>
+            <span style="font-size:0.95rem; font-weight:600; color:#e5e5e5;">{mod['name']}</span>
+            <span style="font-size:0.78rem; color:#383838; margin-left:0.75rem;">{mod['desc']}</span>
         </div>
         """, unsafe_allow_html=True)
     with col_settings:
-        if st.button("⚙", help="Settings"):
+        if st.button("⚙", key="btn_settings", help="Settings"):
             st.session_state["show_settings"] = not st.session_state.get("show_settings", False)
 
     # Inline settings panel
@@ -257,7 +278,7 @@ def render_chat():
 
     # ── Message history ───────────────────────────────────────────────────────
     for msg in messages:
-        with st.chat_message(msg["role"], avatar="⬡" if msg["role"] == "assistant" else None):
+        with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
             if msg.get("fig"):
                 st.plotly_chart(msg["fig"], use_container_width=True)

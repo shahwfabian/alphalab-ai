@@ -71,27 +71,50 @@ def inject_css():
         text-transform: uppercase !important;
     }
 
-    /* ── Buttons ──────────────────────────── */
+    /* ── Buttons — all default to ghost/surface style ── */
     .stButton > button {
-        background: #5865f2 !important;
-        border: none !important;
-        color: #fff !important;
-        font-weight: 500 !important;
+        background: #161616 !important;
+        border: 1px solid #262626 !important;
+        color: #c0c0c0 !important;
+        font-weight: 400 !important;
         font-size: 0.875rem !important;
         border-radius: 8px !important;
         padding: 0.5rem 1.25rem !important;
         font-family: 'Inter', sans-serif !important;
-        transition: background 0.15s !important;
+        transition: border-color 0.15s, color 0.15s !important;
+        text-align: left !important;
     }
-    .stButton > button:hover { background: #4752c4 !important; }
+    .stButton > button:hover {
+        background: #1e1e1e !important;
+        border-color: #444 !important;
+        color: #f0f0f0 !important;
+    }
 
-    /* Secondary button override via key class */
-    button[kind="secondary"] {
-        background: #161616 !important;
-        border: 1px solid #262626 !important;
-        color: #888 !important;
+    /* Module card buttons — slightly more prominent */
+    [data-testid="stButton"][data-key^="mod_"] > button {
+        padding: 1rem 1.25rem !important;
+        line-height: 1.6 !important;
+        min-height: 72px !important;
     }
-    button[kind="secondary"]:hover { color: #e5e5e5 !important; border-color: #444 !important; }
+
+    /* Back / nav buttons */
+    [data-testid="stButton"][data-key="back_home"] > button,
+    .stButton > button[data-testid="baseButton-secondary"] {
+        background: transparent !important;
+        border: none !important;
+        color: #555 !important;
+        padding: 0.35rem 0.75rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Primary accent button (type="primary") */
+    .stButton > button[kind="primary"] {
+        background: #5865f2 !important;
+        border: none !important;
+        color: #fff !important;
+        font-weight: 500 !important;
+    }
+    .stButton > button[kind="primary"]:hover { background: #4752c4 !important; }
 
     /* ── Metrics ──────────────────────────── */
     [data-testid="metric-container"] {
