@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from utils.styles import inject_css
 from utils.modules import MODULES, MODULE_MAP, detect_intent, run_analysis_from_chat
-from utils.ai_explainer import get_openai_response, get_mock_response
+from utils.ai_explainer import get_best_response
 
 st.set_page_config(
     page_title="AlphaLab AI",
@@ -22,14 +22,15 @@ inject_css()
 
 # ── Session defaults ──────────────────────────────────────────────────────────
 for k, v in {
-    "view":           "home",
-    "active_module":  None,
-    "chat_messages":  {},
-    "openai_api_key": "",
-    "risk_free_rate": 0.05,
-    "default_start":  "2020-01-01",
-    "default_end":    "2024-12-31",
-    "uploaded_df":    None,
+    "view":              "home",
+    "active_module":     None,
+    "chat_messages":     {},
+    "anthropic_api_key": "",
+    "openai_api_key":    "",
+    "risk_free_rate":    0.05,
+    "default_start":     "2020-01-01",
+    "default_end":       "2024-12-31",
+    "uploaded_df":       None,
 }.items():
     if k not in st.session_state:
         st.session_state[k] = v
@@ -38,44 +39,9 @@ for k, v in {
 # ── AI response dispatcher ────────────────────────────────────────────────────
 
 def get_ai_response(module: dict, user_message: str) -> str:
-    """Get a contextual AI response for a module chat."""
-    api_key = st.session_state.get("openai_api_key", "")
-
-    if api_key:
-        try:
-            from openai import OpenAI
-            client = OpenAI(api_key=api_key)
-            history = st.session_state.chat_messages.get(module["id"], [])
-            messages = [{"role": "system", "content": module["prompt"]}]
-            for m in history[-10:]:           # last 10 turns for context
-                messages.append({"role": m["role"], "content": m["content"]})
-            messages.append({"role": "user", "content": user_message})
-            resp = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                temperature=0.3,
-                max_tokens=700,
-            )
-            return resp.choices[0].message.content
-        except Exception as e:
-            return f"AI error: {e}. Falling back to demo mode.\n\n" + _mock_response(module, user_message)
-    else:
-        return _mock_response(module, user_message)
-
-
-def _mock_response(module: dict, user_message: str) -> str:
-    """Contextual mock response when no API key is set."""
-    from utils.ai_explainer import classify_question, MOCK_RESPONSES
-    cat  = classify_question(user_message)
-    data = MOCK_RESPONSES.get(cat, MOCK_RESPONSES["regression"])
-    return (
-        f"**Method:** {data['method']}\n\n"
-        f"**Why this fits:** {data['why']}\n\n"
-        f"**Inputs needed:** {data['inputs']}\n\n"
-        f"**Assumptions:** {data['assumptions']}\n\n"
-        f"**Limitations:** {data['limitations']}\n\n"
-        f"*Add an OpenAI API key in Settings for full conversational AI.*"
-    )
+    """Route to the best available AI: Claude → OpenAI → intelligent fallback."""
+    history = st.session_state.chat_messages.get(module["id"], [])
+    return get_best_response(module["id"], history, user_message)
 
 
 # ── Navigation helpers ────────────────────────────────────────────────────────
@@ -229,16 +195,32 @@ def render_chat():
     # Inline settings panel
     if st.session_state.get("show_settings", False):
         with st.expander("Settings", expanded=True):
-            key_in = st.text_input("OpenAI API key", value=st.session_state.openai_api_key,
+            # Detect which provider is active
+            has_anthropic = bool(st.session_state.get("anthropic_api_key", "").strip()
+                                 or __import__("os").environ.get("ANTHROPIC_API_KEY", ""))
+            has_openai    = bool(st.session_state.get("openai_api_key", "").strip()
+                                 or __import__("os").environ.get("OPENAI_API_KEY", ""))
+            status = "● Claude connected" if has_anthropic else ("● OpenAI connected" if has_openai else "● No AI key — using built-in answers")
+            color  = "#22c55e" if (has_anthropic or has_openai) else "#f59e0b"
+            st.markdown(f'<p style="font-size:0.8rem; color:{color}; margin-bottom:0.5rem;">{status}</p>', unsafe_allow_html=True)
+
+            ant_in = st.text_input("Anthropic API key (Claude) — recommended",
+                                   value=st.session_state.anthropic_api_key,
+                                   type="password", placeholder="sk-ant-...")
+            oai_in = st.text_input("OpenAI API key (GPT-4o-mini) — fallback",
+                                   value=st.session_state.openai_api_key,
                                    type="password", placeholder="sk-...")
             c1, c2, _ = st.columns([1, 1, 4])
             with c1:
-                if st.button("Save key"):
-                    st.session_state.openai_api_key = key_in.strip()
+                if st.button("Save keys"):
+                    st.session_state.anthropic_api_key = ant_in.strip()
+                    st.session_state.openai_api_key    = oai_in.strip()
                     st.success("Saved.")
+                    st.rerun()
             with c2:
-                if st.button("Clear key"):
-                    st.session_state.openai_api_key = ""
+                if st.button("Clear keys"):
+                    st.session_state.anthropic_api_key = ""
+                    st.session_state.openai_api_key    = ""
                     st.rerun()
             rf = st.number_input("Risk-free rate (%)", value=st.session_state.risk_free_rate * 100,
                                  min_value=0.0, max_value=20.0, step=0.1)
